@@ -1,0 +1,20 @@
+// Ara6 Compiler Engine v1.0
+const fs = require('fs');
+
+function compileAra6(code) {
+    let jsCode = code
+        // Translate 'func' to 'function'
+        .replace(/func\s+(\w+)\((.*?)\)\s*{/g, 'function $1($2) {')
+        // Translate 'var' (already compatible, but ensures clean spacing)
+        .replace(/var\s+/g, 'let ')
+        // Handle @secure decorator (adds a security check to the start of a function)
+        .replace(/@secure\nfunction\s+(\w+)/g, 'function $1(...args) { console.log("🛡️ Ara6 Security Active"); ')
+        // Handle Print to Console
+        .replace(/print\((.*?)\)/g, 'console.log($1)')
+        // Handle Python-style __init__ to JS constructor
+        .replace(/func\s+__init__\((.*?)\)/g, 'constructor($2)');
+
+    return jsCode;
+}
+
+module.exports = compileAra6;

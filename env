@@ -1,0 +1,5 @@
+PORT=3000
+NODE_ENV=production
+JWT_SECRET=your-super-secret-key-change-this-12345
+MONGODB_URI=mongodb://localhost:27017/freshweblite
+APP_NAME=Fresh Web Lite

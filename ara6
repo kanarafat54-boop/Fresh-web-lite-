@@ -1,0 +1,22 @@
+const express = require('express');
+const compileAra6 = require('./ara6_compiler');
+const fs = require('fs');
+const app = express();
+
+app.get('/run-ara6', (req, res) => {
+    // Read your spec file or an example .ara6 file
+    const ara6Code = fs.readFileSync('./example.ara6', 'utf8');
+    
+    // Compile it to Javascript
+    const runningCode = compileAra6(ara6Code);
+    
+    // Send the result to the browser
+    res.send(`
+        <h1>Ara6 Output</h1>
+        <pre>${runningCode}</pre>
+        <script>${runningCode}</script>
+    `);
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Ara6 Engine Live on Port ${PORT}`));

@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fresh Web Lite - Viral Videos & Search</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1f2937;
+            --secondary: #374151;
+            --accent: #3b82f6;
+            --text: #ffffff;
+            --bg: #111827;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 280px;
+            background: var(--primary);
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 1px solid var(--secondary);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            color: var(--accent);
+        }
+
+        .nav-item {
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: var(--accent);
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 12px;
+            margin: 20px 0;
+            border: 1px solid var(--secondary);
+            border-radius: 8px;
+            background: var(--secondary);
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        .search-box::placeholder {
+            color: #9ca3af;
+        }
+
+        .trending-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin: 20px 0 10px 0;
+            color: #9ca3af;
+        }
+
+        .trending-item {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--secondary);
+            cursor: pointer;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        .trending-item:hover {
+            color: var(--accent);
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: var(--primary);
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--secondary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--text);
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        /* VIDEO FEED */
+        .feed-container {
+            flex: 1;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+
+        .video-card {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            scroll-snap-align: start;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            position: relative;
+            border-bottom: 1px solid var(--secondary);
+        }
+
+        .video-player {
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #666;
+        }
+
+        .video-info {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.6);
+            padding: 16px;
+            border-radius: 8px;
+        }
+
+        .video-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .video-meta {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 10px;
+        }
+
+        .video-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .stat:hover {
+            color: var(--accent);
+        }
+
+        /* SEARCH RESULTS */
+        .search-results {
+            display: none;
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .search-results.active {
+            display: block;
+        }
+
+        .result-section {
+            margin-bottom: 30px;
+        }
+
+        .result-section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--accent);
+        }
+
+        .result-item {
+            background: var(--secondary);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .result-item:hover {
+            background: #4b5563;
+        }
+
+        .result-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .result-desc {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+
+        .result-source {
+            font-size: 12px;
+            color: var(--accent);
+        }
+
+        .result-info {
+            font-size: 12px;
+            color: #999;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid var(--primary);
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--primary);
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--secondary);
+            border-radius: 6px;
+            background: var(--secondary);
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            cursor: pointer;
+            font-size: 24px;
+            color: #aaa;
+        }
+
+        .close-modal:hover {
+            color: var(--text);
+        }
+
+        /* LOADING */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #aaa;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+                padding: 10px;
+            }
+
+            .logo, .trending-title {
+                font-size: 12px;
+            }
+
+            .search-box {
+                padding: 8px;
+                font-size: 12px;
+            }
+
+            .nav-item {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="logo">🎬 FreshWeb</div>
+            
+            <input type="text" class="search-box" id="globalSearch" placeholder="Search everything...">
+
+            <div class="nav-item active" onclick="showFeed()">📺 Viral Videos</div>
+            <div class="nav-item" onclick="searchType('all')">🌐 All</div>
+            <div class="nav-item" onclick="searchType('clearnet')">🔍 Clearnet</div>
+            <div class="nav-item" onclick="searchType('i2p')">🔐 I2P</div>
+            <div class="nav-item" onclick="searchType('tor')">🧅 Tor</div>
+
+            <div class="trending-title">📊 TRENDING</div>
+            <div id="trendingList"></div>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content">
+            <!-- HEADER -->
+            <div class="header">
+                <div class="header-title" id="pageTitle">Viral Videos Feed</div>
+                <div class="auth-buttons">
+                    <button class="btn btn-secondary" onclick="openModal('login')">🔐 Login</button>
+                    <button class="btn btn-primary" onclick="openModal('signup')">✨ Sign Up</button>
+                </div>
+            </div>
+
+            <!-- FEED CONTAINER -->
+            <div class="feed-container" id="feedContainer">
+                <div class="loading">Loading videos...</div>
+            </div>
+
+            <!-- SEARCH RESULTS -->
+            <div class="search-results" id="searchResults"></div>
+        </div>
+    </div>
+
+    <!-- LOGIN MODAL -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <div class="close-modal" onclick="closeModal('login')">&times;</div>
+            <div class="modal-title">Login</div>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button class="btn btn-primary" style="width: 100%;">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- SIGNUP MODAL -->
+    <div class="modal" id="signupModal">
+        <div class="modal-content">
+            <div class="close-modal" onclick="closeModal('signup')">&times;</div>
+            <div class="modal-title">Sign Up</div>
+            <form onsubmit="handleSignup(event)">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="signupUsername" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="signupEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="signupPassword" required>
+                </div>
+                <button class="btn btn-primary" style="width: 100%;">Sign Up</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+        let currentPage = 1;
+        let searchType = 'all';
+        let isLoading = false;
+
+        // Load viral videos
+        async function loadVideos() {
+            try {
+                isLoading = true;
+                const response = await fetch(`${API_BASE}/api/videos/feed?page=${currentPage}&limit=10`);
+                const data = await response.json();
+
+                if (currentPage === 1) {
+                    document.getElementById('feedContainer').innerHTML = '';
+                }
+
+                if (data.videos.length === 0) {
+                    document.getElementById('feedContainer').innerHTML += '<div class="loading">No videos available</div>';
+                    return;
+                }
+
+                data.videos.forEach(video => {
+                    const card = document.createElement('div');
+                    card.className = 'video-card';
+                    card.innerHTML = `
+                        <div class="video-player">
+                            ${video.title || 'Video Player'}
+                        </div>
+                        <div class="video-info">
+                            <div class="video-title">${video.title}</div>
+                            <div class="video-meta">by ${video.uploadedBy || 'Unknown'}</div>
+                            <div class="video-stats">
+                                <div class="stat">👁️ ${video.views || 0} views</div>
+                                <div class="stat">❤️ ${video.likes || 0} likes</div>
+                                <div class="stat">💬 ${video.comments || 0} comments</div>
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('feedContainer').appendChild(card);
+                });
+
+                currentPage++;
+                isLoading = false;
+            } catch (error) {
+                console.error('Error loading videos:', error);
+                document.getElementById('feedContainer').innerHTML += '<div class="loading">Failed to load videos</div>';
+                isLoading = false;
+            }
+        }
+
+        // Search functionality
+        async function performSearch(query) {
+            if (!query.trim()) {
+                showFeed();
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/api/search?q=${encodeURIComponent(query)}&type=${searchType}`);
+                const data = await response.json();
+
+                let resultsHTML = `<div class="result-section"><div class="result-section-title">Search Results for "${query}"</div>`;
+
+                // Videos
+                if (data.videos && data.videos.length > 0) {
+                    resultsHTML += '<div class="result-section"><div class="result-section-title">📺 Videos</div>';
+                    data.videos.forEach(video => {
+                        resultsHTML += `
+                            <div class="result-item">
+                                <div class="result-title">${video.title}</div>
+                                <div class="result-desc">${video.description || ''}</div>
+                                <div class="result-source">Fresh Web - ${video.views} views</div>
+                            </div>
+                        `;
+                    });
+                    resultsHTML += '</div>';
+                }
+
+                // Clearnet
+                if (data.clearnetResults && data.clearnetResults.length > 0) {
+                    resultsHTML += '<div class="result-section"><div class="result-section-title">🌐 Clearnet (Internet)</div>';
+                    data.clearnetResults.forEach(result => {
+                        resultsHTML += `
+                            <div class="result-item">
+                                <div class="result-title">${result.title}</div>
+                                <div class="result-desc">${result.description}</div>
+                                <div class="result-source">${result.source}</div>
+                            </div>
+                        `;
+                    });
+                    resultsHTML += '</div>';
+                }
+
+                // I2P
+                if (data.i2pResults && data.i2pResults.length > 0) {
+                    resultsHTML += '<div class="result-section"><div class="result-section-title">🔐 I2P Network</div>';
+                    data.i2pResults.forEach(result => {
+                        resultsHTML += `
+                            <div class="result-item">
+                                <div class="result-title">${result.title}</div>
+                                <div class="result-desc">${result.description}</div>
+                                <div class="result-source">${result.source}</div>
+                                <div class="result-info">${result.info}</div>
+                            </div>
+                        `;
+                    });
+                    resultsHTML += '</div>';
+                }
+
+                // Tor
+                if (data.torResults && data.torResults.length > 0) {
+                    resultsHTML += '<div class="result-section"><div class="result-section-title">🧅 Tor Network</div>';
+                    data.torResults.forEach(result => {
+                        resultsHTML += `
+                            <div class="result-item">
+                                <div class="result-title">${result.title}</div>
+                                <div class="result-desc">${result.description}</div>
+                                <div class="result-source">${result.source}</div>
+                                <div class="result-info">${result.info}</div>
+                            </div>
+                        `;
+                    });
+                    resultsHTML += '</div>';
+                }
+
+                document.getElementById('searchResults').innerHTML = resultsHTML;
+                document.getElementById('feedContainer').style.display = 'none';
+                document.getElementById('searchResults').classList.add('active');
+                document.getElementById('pageTitle').textContent = `Search: ${query}`;
+            } catch (error) {
+                console.error('Search error:', error);
+                alert('Search failed');
+            }
+        }
+
+        // Show feed
+        function showFeed() {
+            document.getElementById('feedContainer').style.display = 'block';
+            document.getElementById('searchResults').classList.remove('active');
+            document.getElementById('pageTitle').textContent = 'Viral Videos Feed';
+            if (document.getElementById('feedContainer').innerHTML.includes('Loading')) {
+                loadVideos();
+            }
+        }
+
+        // Authentication
+        function openModal(type) {
+            document.getElementById(type + 'Modal').classList.add('active');
+        }
+
+        function closeModal(type) {
+            document.getElementById(type + 'Modal').classList.remove('active');
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    alert('Login successful!');
+                    closeModal('login');
+                    location.reload();
+                } else {
+                    alert(data.error || 'Login failed');
+                }
+            } catch (error) {
+                alert('Login error: ' + error.message);
+            }
+        }
+
+        async function handleSignup(e) {
+            e.preventDefault();
+            const username = document.getElementById('signupUsername').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    alert('Account created! Please login.');
+                    closeModal('signup');
+                    openModal('login');
+                } else {
+                    alert(data.error || 'Signup failed');
+                }
+            } catch (error) {
+                alert('Signup error: ' + error.message);
+            }
+        }
+
+        // Search type
+        function searchType(type) {
+            searchType = type;
+            const query = document.getElementById('globalSearch').value;
+            if (query) performSearch(query);
+        }
+
+        // Load trending
+        async function loadTrending() {
+            try {
+                const response = await fetch(`${API_BASE}/api/search/trending`);
+                const data = await response.json();
+                let html = '';
+                data.trending.slice(0, 5).forEach(item => {
+                    html += `<div class="trending-item" onclick="performSearch('${item._id}')">${item._id}</div>`;
+                });
+                document.getElementById('trendingList').innerHTML = html;
+            } catch (error) {
+                console.error('Error loading trending:', error);
+            }
+        }
+
+        // Infinite scroll
+        document.getElementById('feedContainer').addEventListener('scroll', () => {
+            const container = document.getElementById('feedContainer');
+            if (container.scrollTop + container.clientHeight >= container.scrollHeight - 1000) {
+                if (!isLoading) loadVideos();
+            }
+        });
+
+        // Search event
+        document.getElementById('globalSearch').addEventListener('input', (e) => {
+            performSearch(e.target.value);
+        });
+
+        // Initialize
+        window.addEventListener('load', () => {
+            loadVideos();
+            loadTrending();
+        });
+    </script>
+</body>
+</html>
